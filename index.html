@@ -10,14 +10,25 @@
 </head>
 <body class="bg-gray-900">
   <!-- Add navbar -->
-  <nav class="sticky top-0 bg-black/30 backdrop-blur-sm px-6 py-4  mx-0 mt-0 flex justify-between items-center">
-    <div class="text-white font-bold text-2xl"><img src="https://www.vhv.rs/dpng/d/460-4601328_vice-president-of-india-shri-venkaiah-naidu-to.png" alt="" class="h-10 w-10"></div>
-    <div class="text-white font-bold flex-auto">&nbsp;&nbsp; Lovely Professional University </div>
-    <div class="flex space-x-6">
-      <button class="text-white hover:text-blue-400 transition-colors">Coming</button>
-      <button class="text-white hover:text-blue-400 transition-colors">Soon</button>
-      <button class="text-white hover:text-blue-400 transition-colors">Coming</button>
-      <button class="text-white hover:text-blue-400 transition-colors">Soon</button> 
+  <nav class="sticky top-0 bg-black/30 backdrop-blur-sm px-6 py-4 mx-0 mt-0">
+    <div class="flex flex-col sm:flex-row justify-between items-center">
+      <div class="flex items-center w-full sm:w-auto justify-between">
+        <div class="flex items-center">
+          <div class="text-white font-bold text-2xl">
+            <img src="https://www.vhv.rs/dpng/d/460-4601328_vice-president-of-india-shri-venkaiah-naidu-to.png" alt="" class="h-10 w-10">
+          </div>
+          <div class="text-white font-bold ml-2">Lovely Professional University</div>
+        </div>
+        <button id="mobile-menu-button" class="sm:hidden text-white">
+          <i class="fas fa-bars text-2xl"></i>
+        </button>
+      </div>
+      <div id="nav-links" class="hidden sm:flex sm:space-x-6 w-full sm:w-auto mt-4 sm:mt-0 space-y-2 sm:space-y-0">
+        <button class="text-white hover:text-blue-400 transition-colors w-full sm:w-auto">Coming</button>
+        <button class="text-white hover:text-blue-400 transition-colors w-full sm:w-auto">Soon</button>
+        <button class="text-white hover:text-blue-400 transition-colors w-full sm:w-auto">Coming</button>
+        <button class="text-white hover:text-blue-400 transition-colors w-full sm:w-auto">Soon</button> 
+      </div>
     </div>
   </nav>
   <div class="min-h-screen flex justify-center items-center p-4 sm:p-0">
@@ -149,6 +160,13 @@
     loadingSpinner.classList.add('hidden');
     searchButton.disabled = false;
     
+  });
+
+  const mobileMenuButton = document.getElementById('mobile-menu-button');
+  const navLinks = document.getElementById('nav-links');
+
+  mobileMenuButton.addEventListener('click', () => {
+    navLinks.classList.toggle('hidden');
   });
 </script>
   <!-- Add footer -->
