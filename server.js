@@ -12,24 +12,36 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-app.post('/get-student-info', (req, res) => {
+app.post('/get-student-info', async (req, res) => {
   const { registrationNumber } = req.body;
   
   try {
-    const excelPath = path.join(__dirname, 'students.xlsx');
-    console.log('Reading Excel file from:', excelPath);
+    // Define paths for all three Excel files
+    const excelPath1 = path.join(__dirname, 'students.xlsx');
+    const excelPath2 = path.join(__dirname, 'students1.xlsx');
+    const excelPath3 = path.join(__dirname, 'students3.xlsx');  // New file
 
-    const workbook = xlsx.readFile(excelPath);
-    const sheetName = workbook.SheetNames[0];
-    const worksheet = workbook.Sheets[sheetName];
+    // Read all Excel files
+    const workbook1 = xlsx.readFile(excelPath1);
+    const workbook2 = xlsx.readFile(excelPath2);
+    const workbook3 = xlsx.readFile(excelPath3);  // New workbook
 
-    const students = xlsx.utils.sheet_to_json(worksheet);
+    // Get worksheets from all files
+    const worksheet1 = workbook1.Sheets[workbook1.SheetNames[0]];
+    const worksheet2 = workbook2.Sheets[workbook2.SheetNames[0]];
+    const worksheet3 = workbook3.Sheets[workbook3.SheetNames[0]];  // New worksheet
 
-    // Changed to match Excel column name "RegistrationNumber"
-    const student = students.find(s => String(s.RegistrationNumber) === String(registrationNumber));
+    // Convert worksheets to JSON
+    const students1 = xlsx.utils.sheet_to_json(worksheet1);
+    const students2 = xlsx.utils.sheet_to_json(worksheet2);
+    const students3 = xlsx.utils.sheet_to_json(worksheet3);  // New students array
+
+    // Search in first Excel file
+    let student = students1.find(s => String(s.RegistrationNumber) === String(registrationNumber));
+    let sourceFile = 'students1';
 
     if (student) {
-      // Format the response to match your frontend expectations
+      // If found in first file, calculate rank and percentage using students1
       const formattedStudent = {
         Name: student.Name.trim(),
         RegistrationNumber: student.RegistrationNumber,
@@ -39,15 +51,59 @@ app.post('/get-student-info', (req, res) => {
         Gender: student.Gender,
         BatchYear: student.BatchYear,
         Country: student.Country,
-        Rank: calculateRank(students, student),
-        Percentage: calculatePercentage(students, student),
+        Rank: calculateRank(students1, student),
+        Percentage: calculatePercentage(students1, student),
       };
       
-      console.log('Found student:', formattedStudent);
+      console.log('Found student in first file:', formattedStudent);
       res.json(formattedStudent);
     } else {
-      console.log('No student found with registration number:', registrationNumber);
-      res.status(404).json({ error: 'Student not found' });
+      // If not found in first file, search in second file
+      student = students2.find(s => String(s.RegistrationNumber) === String(registrationNumber));
+      sourceFile = 'students2';
+
+      if (student) {
+        const formattedStudent = {
+          Name: student.Name.trim(),
+          RegistrationNumber: student.RegistrationNumber,
+          Course: student.Course,
+          State: student.State,
+          CGPA: student.CGPA,
+          Gender: student.Gender,
+          BatchYear: student.BatchYear,
+          Section: student.Section,
+          Rank: calculateRank(students2, student),
+          Percentage: calculatePercentage(students2, student),
+        };
+        
+        console.log('Found student in second file:', formattedStudent);
+        res.json(formattedStudent);
+      } else {
+        // If not found in second file, search in third file
+        student = students3.find(s => String(s.RegistrationNumber) === String(registrationNumber));
+        sourceFile = 'students3';
+
+        if (student) {
+          const formattedStudent = {
+            Name: student.Name.trim(),
+            RegistrationNumber: student.RegistrationNumber,
+            Course: student.Course,
+            State: student.State,
+            CGPA: student.CGPA,
+            Gender: student.Gender,
+            BatchYear: student.BatchYear,
+            Section: student.Section,
+            Rank: calculateRank(students3, student),
+            Percentage: calculatePercentage(students3, student),
+          };
+          
+          console.log('Found student in third file:', formattedStudent);
+          res.json(formattedStudent);
+        } else {
+          console.log('No student found in any file with registration number:', registrationNumber);
+          res.status(404).json({ error: 'Student not found' });
+        }
+      }
     }
 
   } catch (error) {
