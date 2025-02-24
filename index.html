@@ -24,7 +24,8 @@
         </button>
       </div>
       <div id="nav-links" class="hidden sm:flex sm:space-x-6 w-full sm:w-auto mt-4 sm:mt-0 space-y-2 sm:space-y-0">
-        <button class="text-white hover:text-blue-400 transition-colors w-full sm:w-auto">Coming</button>
+        <button class="text-white hover:text-blue-400 transition-colors w-full sm:w-auto">Home</button>
+        <button id="gpa-calculator-btn" class="text-white hover:text-blue-400 transition-colors w-full sm:w-auto">GPA Calculator</button>
         <button class="text-white hover:text-blue-400 transition-colors w-full sm:w-auto">Soon</button>
         <button class="text-white hover:text-blue-400 transition-colors w-full sm:w-auto">Coming</button>
         <button class="text-white hover:text-blue-400 transition-colors w-full sm:w-auto">Soon</button> 
@@ -172,9 +173,168 @@
     navLinks.classList.toggle('hidden');
   });
 </script>
+
+<!-- Update the GPA Calculator page HTML -->
+<div id="gpa-calculator-page" class="hidden min-h-screen flex justify-center items-center p-4 sm:p-0">
+  <div class="container mx-auto bg-gray-700 rounded-lg p-6 sm:p-14 w-full sm:w-1/2">
+    <div class="flex flex-col items-center mb-8">
+      <img class="h-20 w-20 mb-4" src="https://i.ibb.co/HfGV26Ls/Daco.png" alt="calculator-icon">
+      <h1 class="text-center font-bold text-white text-2xl sm:text-4xl">GPA Calculator</h1>
+      <p class="text-gray-300 mt-2 text-center">Calculate your GPA based on grades and credits</p>
+    </div>
+    
+    <div class="mb-8 bg-gray-800 p-6 rounded-lg">
+      <label for="numSubjects" class="block text-white mb-2 font-semibold">Number of Subjects:</label>
+      <div class="flex justify-between gap-4">
+        <input type="number" id="numSubjects" min="1" 
+          class="w-80 px-4 py-2 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-900 text-white"
+          placeholder="Enter">
+        <button id="generateFields" 
+          class="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors duration-200 flex-shrink-0 font-semibold">
+          Generate Fields
+        </button>
+      </div>
+    </div>
+
+    <form id="gpaForm" class="hidden">
+      <div id="subjectsContainer" class="space-y-6 mb-8"></div>
+      <button type="submit" 
+        class="w-full bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-colors duration-200 font-semibold text-lg">
+        Calculate GPA
+      </button>
+    </form>
+
+    <div id="gpa-result" class="mt-8 text-center"></div>
+  </div>
+</div>
+
+<!-- Update the JavaScript for generating subject fields -->
+<script>
+// ... (keep existing script code) ...
+
+// GPA Calculator functionality
+const gpaCalculatorBtn = document.getElementById('gpa-calculator-btn');
+const gpaCalculatorPage = document.getElementById('gpa-calculator-page');
+const mainPage = document.querySelector('.min-h-screen:not(#gpa-calculator-page)');
+const generateFieldsBtn = document.getElementById('generateFields');
+const gpaForm = document.getElementById('gpaForm');
+const gpaResult = document.getElementById('gpa-result');
+
+// Grade points mapping
+const gradePoints = {
+  "O": 10, "o": 10,
+  "A+": 9, "a+": 9,
+  "A": 8, "a": 8,
+  "B+": 7, "b+": 7,
+  "B": 6, "b": 6,
+  "C": 5, "c": 5,
+  "D": 4, "d": 4,
+  "E": 0, "e": 0
+};
+
+gpaCalculatorBtn.addEventListener('click', () => {
+  mainPage.classList.add('hidden');
+  gpaCalculatorPage.classList.remove('hidden');
+  // Reset form
+  gpaForm.classList.add('hidden');
+  gpaResult.textContent = '';
+  document.getElementById('numSubjects').value = '';
+  document.getElementById('subjectsContainer').innerHTML = '';
+});
+
+generateFieldsBtn.addEventListener('click', () => {
+  const numSubjects = parseInt(document.getElementById('numSubjects').value);
+  const container = document.getElementById('subjectsContainer');
+  container.innerHTML = '';
+  
+  if (!numSubjects || numSubjects < 1) {
+    alert('Please enter a valid number of subjects.');
+    return;
+  }
+
+  for (let i = 0; i < numSubjects; i++) {
+    const div = document.createElement('div');
+    div.className = 'bg-gray-800 p-6 rounded-lg';
+    div.innerHTML = `
+      <div class="text-blue-400 font-semibold mb-4">Subject ${i + 1}</div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+        <div>
+          <label class="block text-white mb-2 font-medium">Grade:</label>
+          <input type="text" name="grade" required placeholder="O, A+, A, B+, etc."
+            class="w-full px-4 py-2 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-900 text-white">
+        </div>
+        <div>
+          <label class="block text-white mb-2 font-medium">Credits:</label>
+          <input type="number" name="credit" required min="0" step="0.5"
+            class="w-full px-4 py-2 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-gray-900 text-white"
+            placeholder="0.0">
+        </div>
+      </div>
+    `;
+    container.appendChild(div);
+  }
+  gpaForm.classList.remove('hidden');
+  gpaResult.innerHTML = '';
+});
+
+gpaForm.addEventListener('submit', (e) => {
+  e.preventDefault();
+  const gradeInputs = document.getElementsByName('grade');
+  const creditInputs = document.getElementsByName('credit');
+  
+  let totalPoints = 0;
+  let totalCredits = 0;
+  
+  for (let i = 0; i < gradeInputs.length; i++) {
+    const grade = gradeInputs[i].value.trim().toUpperCase();
+    const credit = parseFloat(creditInputs[i].value);
+    
+    if (!gradePoints.hasOwnProperty(grade)) {
+      alert(`Invalid grade '${grade}' provided`);
+      return;
+    }
+    
+    totalPoints += gradePoints[grade] * credit;
+    totalCredits += credit;
+  }
+  if (totalCredits === 0) {
+    alert('Total credits cannot be zero');
+    return;
+  }
+  
+  const gpa = totalPoints / totalCredits;
+  const roundedGpa = Math.round(gpa * 100) / 100;
+  gpaResult.innerHTML = `
+    <div class="bg-gray-800 p-8 rounded-lg inline-block">
+      <div class="text-gray-400 mb-2">Your GPA</div>
+      <div class="text-4xl font-bold text-white mb-2">${roundedGpa.toFixed(2)}</div>
+      <div class="text-blue-400 text-sm">${getGPAMessage(roundedGpa)}</div>
+    </div>
+  `;
+  gpaResult.classList.remove('hidden');
+});
+
+// Add a function to get GPA-based messages
+function getGPAMessage(gpa) {
+  if (gpa >= 9.0) return "Outstanding Performance! 🌟";
+  if (gpa >= 8.0) return "Excellent Work! 💫";
+  if (gpa >= 7.0) return "Very Good Achievement! ⭐";
+  if (gpa >= 6.0) return "Good Progress! 👍";
+  if (gpa >= 5.0) return "Keep Working Hard! 💪";
+  return "You Can Improve! 🎯";
+}
+
+// Add click event listeners to all navbar buttons to show main page
+document.querySelectorAll('#nav-links button:not(#gpa-calculator-btn)').forEach(button => {
+  button.addEventListener('click', () => {
+    gpaCalculatorPage.classList.add('hidden');
+    mainPage.classList.remove('hidden');
+  });
+});
+</script>
   <!-- Add footer -->
   <footer class="fixed bottom-0 w-full bg-black/10 backdrop-blur-sm text-white text-center py-2 text-sm">
-    Developed with <span>❤️</span> by Meraj Haque | <a href="https://github.com/MerazHaque" 
+    Developed with <span class="animate-pulse">❤️</span> by Meraj Haque | <a href="https://github.com/MerazHaque" 
     target="_blank" class="hover:text-blue-400 transition-colors"><i class="fa-brands fa-github"></i></a>
   <a href="https://www.linkedin.com/in/meraj-haque-mz/" target="_blank" class="hover:text-blue-400 transition-colors"><i class="fa-brands fa-linkedin"></i></a>
   <a href="https://www.instagram.com/meraz_mz_/" target="_blank" class="hover:text-blue-400 transition-colors"><i class="fa-brands fa-instagram"></i></a></footer>
